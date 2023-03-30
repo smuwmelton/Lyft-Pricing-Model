@@ -1,0 +1,43 @@
+import numpy as np
+
+def match_rate(lyft_take):
+    if lyft_take <= 3:
+        return 0.93
+    elif lyft_take >= 6:
+        return 0.6
+    else:
+        return 0.93 + ((lyft_take - 3) * (-0.33 / 3))
+
+def net_revenue(lyft_take, months=12):
+    driver_cac = 500
+    driver_churn = 0.05
+    rides_per_driver = 100
+    rider_cac = (10 + 20) / 2
+    rider_churn_no_fail = 0.1
+    rider_churn_fail = 0.33
+    rides_per_rider = 1
+
+    initial_drivers = -driver_cac / driver_churn / rides_per_driver
+    initial_riders = -rider_cac / rider_churn_no_fail / rides_per_rider
+
+    drivers = initial_drivers
+    riders = initial_riders
+    total_net_revenue = 0
+
+    for _ in range(months):
+        current_match_rate = match_rate(lyft_take)
+        drivers = drivers * (1 - driver_churn) + (current_match_rate - 0.6) * riders * rides_per_rider if current_match_rate > 0.6 else 0
+        riders = riders * (1 - (rider_churn_no_fail * (current_match_rate >= 1) + rider_churn_fail * (current_match_rate < 1) * current_match_rate))
+
+        gross_revenue = riders * rides_per_rider * 25
+        driver_earnings = drivers * rides_per_driver * (25 - lyft_take)
+        net_revenue = gross_revenue - driver_earnings
+        total_net_revenue += net_revenue
+
+    return total_net_revenue
+
+take_values = np.linspace(0, 6, 100)
+net_revenues = [net_revenue(take) for take in take_values]
+optimal_take = take_values[np.argmax(net_revenues)]
+
+print(f"Optimal Lyft take: ${optimal_take:.2f}")
