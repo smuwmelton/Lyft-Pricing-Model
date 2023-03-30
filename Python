@@ -41,3 +41,12 @@ net_revenues = [net_revenue(take) for take in take_values]
 optimal_take = take_values[np.argmax(net_revenues)]
 
 print(f"Optimal Lyft take: ${optimal_take:.2f}")
+
+plt.plot(take_values, net_revenues)
+plt.xlabel("Lyft's Take per Ride ($)")
+plt.ylabel("Net Revenue Over 12 Months")
+plt.title("Net Revenue vs. Lyft's Take per Ride")
+plt.axvline(x=optimal_take, color='r', linestyle='--', label=f"Optimal Take: ${optimal_take:.2f}")
+plt.legend()
+plt.grid()
+plt.show()
